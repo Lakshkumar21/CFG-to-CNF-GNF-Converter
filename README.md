@@ -1,0 +1,80 @@
+# 📚 Theory of Automata and Formal Languages (TAFL)
+## Project: Chomsky Normal Form (CNF) and Greibach Normal Form (GNF) Converter
+
+---
+
+### 👨‍💻 Author Information
+- **Name:** Laksh Kumar
+- **Roll No:** 2024UCM2375
+- **Subject:** Theory of Automata and Formal Languages (TAFL)
+- **Topic:** CFG to CNF & GNF Step-by-Step Conversion
+
+---
+
+### 📖 Description
+This project was developed as a comprehensive tool to help students and researchers understand the mathematical transformations required to convert a Context-Free Grammar (CFG) into standardized forms. The application performs rigorous transformations and displays every intermediate grammar step, providing a clear visual path from an arbitrary CFG to its **Chomsky Normal Form (CNF)** or **Greibach Normal Form (GNF)**.
+
+The goal is to provide a transparent look into the systematic algorithms used in theoretical computer science and modern parsing techniques.
+
+---
+
+### ✨ Key Features
+*   **Dual Pipeline Conversion**:
+    *   **6-Step CNF Pipeline**: Start Symbol Augmentation, ε-Elimination, Unit Removal, Useless Symbol Removal, Terminal Replacement, and Binarization.
+    *   **9-Step GNF Pipeline**: Full Greibach ordering including variable indexing ($A_i < A_j$), indirect cycle detection, direct left-recursion removal ($Z_i$), and forward/backward substitution.
+*   **Step-by-Step Visualization**: Every mathematical operation is tracked and displayed as an individual "Step Card" showing the state of the grammar at that precise moment.
+*   **Theory Portal**: Integrated educational pages explaining the mathematical "What" and "How" of each normalization form.
+*   **Dual Input Modes**: Use a professional **Text Editor** for bulk rules or a **Visual Form** for structured input.
+*   **Premium "Saki-Inspired" Design**: Minimalist, high-contrast monochrome aesthetic with fluid animations and responsive glassmorphism.
+
+---
+
+### 🚀 Getting Started
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/lakshkumar/CFG_converter_TAFLproject.git
+cd CFG_converter_TAFLproject
+```
+
+#### 2. Install Dependencies
+Ensure you have [Node.js](https://nodejs.org/) installed on your system.
+```bash
+npm install
+```
+
+#### 3. Run Locally
+Start the development server:
+```bash
+npm run dev
+```
+
+#### 4. Build for Production
+To generate a production-ready bundle in the `dist/` folder:
+```bash
+npm run build
+```
+
+---
+
+### 🧮 Conversion Logic (Pipelines)
+
+#### Chomsky Normal Form (CNF) Logic
+1.  **Preprocessing**: Ensures start variable is isolated.
+2.  **ε-elimination**: Power-set generation for nullable variables.
+3.  **Unit Removal**: Transitive closure analysis.
+4.  **Useless Pruning**: Generating and Reachable set filtration.
+5.  **Terminal Replacement**: Standardizes binary rule literals.
+6.  **Binarization**: Decomposes long rules into binary equivalents.
+
+#### Greibach Normal Form (GNF) Logic
+1.  **Preprocessing** & **Simplification**: (Epsilon/Unit/Useless removal).
+2.  **CNF Initialization**: Sets the baseline binary structure.
+3.  **Variable Ordering**: Establishes $A_1, A_2, \dots, A_n$ hierarchy.
+4.  **Left Recursion Removal**: Solves direct/indirect cycles using the Greibach lemma.
+5.  **Sequential Substitution**: Back-substitutes variables to ensure every rule starts with a terminal.
+
+---
+
+### ⚖️ License
+This project is for educational purposes. Developed by Laksh Kumar.
