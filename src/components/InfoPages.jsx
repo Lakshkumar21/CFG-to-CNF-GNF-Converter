@@ -9,6 +9,55 @@ const pageVariants = {
 
 const transitionAttr = { duration: 0.4, ease: [0.16, 1, 0.3, 1] };
 
+export function Home() {
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" transition={transitionAttr} className="home-container">
+      <div className="hero-landing">
+        <h1 className="heading-xl">
+          Formal Grammar<br />
+          <span style={{ color: 'var(--text-muted)', fontWeight: 300 }}>Theory Portal</span>
+        </h1>
+        <div className="hero-divider" />
+        <p className="hero-subtitle">
+          A comprehensive environment for studying, converting, and parsing Context-Free Grammars. 
+          Built for mathematical precision and clarity.
+        </p>
+      </div>
+
+      <div className="features-grid">
+        <div className="feature-card glass-panel">
+          <div className="feature-icon">CNF</div>
+          <h3>Chomsky Normal Form</h3>
+          <p>Transform any CFG into a binary tree structure. Optimal for CYK parsing algorithms.</p>
+        </div>
+        <div className="feature-card glass-panel">
+          <div className="feature-icon">GNF</div>
+          <h3>Greibach Normal Form</h3>
+          <p>Convert grammars to a terminal-first format. The foundation for Pushdown Automata transitions.</p>
+        </div>
+        <div className="feature-card glass-panel">
+          <div className="feature-icon">CYK</div>
+          <h3>String Parsing</h3>
+          <p>Test string membership with visual CYK tables, parse trees, and leftmost derivations.</p>
+        </div>
+      </div>
+
+      <div className="glass-panel" style={{ padding: '40px', marginTop: '40px' }}>
+        <h2 style={{ marginBottom: '20px' }}>What is this Project?</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.8 }}>
+          This portal is designed to provide a hands-on learning experience for Computer Science students and researchers exploring <strong>Automata Theory and Formal Languages (TAFL)</strong>. 
+          By visualizing the complex transformations from CFG to CNF and GNF, we make abstract concepts tangible and easier to grasp.
+        </p>
+        <div className="info-divider" />
+        <div className="project-meta">
+          <p><strong>Developed by:</strong> Laksh Kumar</p>
+          <p><strong>Roll No:</strong> 2024UCM2375</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function AboutCFG() {
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" transition={transitionAttr} className="glass-panel" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto' }}>

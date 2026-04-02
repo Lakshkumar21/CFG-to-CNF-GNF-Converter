@@ -466,3 +466,135 @@ export function convertToGNF(input) {
 
   return steps;
 }
+
+/**
+ * CYK Algorithm for String Parsing
+ * @param {Object} g - Grammar in CNF
+ * @param {string} input - String to parse
+ * @returns {Object} { accepted: boolean, table: Set[][] }
+ */
+export function checkString(g, input) {
+  // Handle empty string
+  if (!input || input === EPSILON) {
+    const startRules = g.productions.get(g.start) || [];
+    const generatesEpsilon = startRules.some(p => p.length === 1 && p[0] === EPSILON);
+    return { accepted: generatesEpsilon, table: [] };
+  }
+
+  const n = input.length;
+  // Initialize CYK table: table[length][start_pos]
+  const table = Array.from({ length: n + 1 }, () => 
+    Array.from({ length: n }, () => new Set())
+  );
+
+  // Fill length 1
+  for (let i = 0; i < n; i++) {
+    const char = input[i];
+    for (const [v, ps] of g.productions) {
+      for (const p of ps) {
+        if (p.length === 1 && p[0] === char) {
+          table[1][i].add(v);
+        }
+      }
+    }
+  }
+
+  // Fill lengths 2 to n
+  for (let len = 2; len <= n; len++) {
+    for (let pos = 0; pos <= n - len; pos++) {
+      for (let k = 1; k < len; k++) {
+        // A -> BC where B generates first k chars and C generates remaining len-k chars
+        // B comes from table[k][pos]
+        // C comes from table[len-k][pos+k]
+        for (const [v, ps] of g.productions) {
+          for (const p of ps) {
+            if (p.length === 2) {
+              const [B, C] = p;
+              if (table[k][pos].has(B) && table[len - k][pos + k].has(C)) {
+                table[len][pos].add(v);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    accepted: table[n][0].has(g.start),
+    table: table
+  };
+}
+
+/**
+ * Backtracks through the CYK table to build a derivation tree.
+ */
+export function buildParseTree(g, table, input, len, pos, variable) {
+  if (len === 1) {
+    const char = input[pos];
+    return {
+      sym: variable,
+      children: [{ sym: char, terminal: true }],
+      terminal: false
+    };
+  }
+
+  const rules = g.productions.get(variable) || [];
+  for (let k = 1; k < len; k++) {
+    for (const p of rules) {
+      if (p.length === 2) {
+        const [B, C] = p;
+        if (table[k][pos].has(B) && table[len - k][pos + k].has(C)) {
+          const leftNode = buildParseTree(g, table, input, k, pos, B);
+          const rightNode = buildParseTree(g, table, input, len - k, pos + k, C);
+          if (leftNode && rightNode) {
+            return {
+              sym: variable,
+              children: [leftNode, rightNode],
+              terminal: false
+            };
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Generates leftmost derivation steps from a parse tree.
+ */
+export function getDerivationSteps(tree) {
+  if (!tree) return [];
+  const steps = [];
+
+  function getSentential(nodes) {
+    return nodes.map(n => n.sym).join('');
+  }
+
+  let currentNodes = [tree];
+  steps.push(getSentential(currentNodes));
+
+  // Limit iterations to prevent infinite loops on crazy trees
+  let iterations = 0;
+  while (currentNodes.some(n => !n.terminal) && iterations < 100) {
+    iterations++;
+    const idx = currentNodes.findIndex(n => !n.terminal);
+    if (idx === -1) break;
+
+    const nodeToExpand = currentNodes[idx];
+    if (nodeToExpand.children) {
+      currentNodes = [
+        ...currentNodes.slice(0, idx),
+        ...nodeToExpand.children,
+        ...currentNodes.slice(idx + 1)
+      ];
+      steps.push(getSentential(currentNodes));
+    } else {
+      // Mark as terminal to avoid infinite loop
+      nodeToExpand.terminal = true;
+    }
+  }
+
+  return steps;
+}
