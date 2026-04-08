@@ -268,14 +268,27 @@ export function parseTextGrammar(text) {
   let start = null;
   const varsSet = new Set();
   for (const line of lines) {
-    const match = line.match(/^([S0-9A-Z']+)[\s\d]*(-+>|→)\s*(.+)$/);
-    if (!match) continue;
+    if (!line.includes('->') && !line.includes('→')) {
+      throw new Error(`Invalid line format: "${line}". Rules must follow "LHS -> RHS" format.`);
+    }
+    const match = line.match(/^([S0-9A-Z']+)[\s\d]*(-+>|→)\s*(.*)$/);
+    if (!match) {
+      throw new Error(`Invalid rule LHS: "${line.split(/[->→]/)[0].trim()}". LHS must be Uppercase variables (e.g. S, A, B1).`);
+    }
     const [, lhs, , rhsPart] = match;
+    const trimmedRhs = rhsPart.trim();
+    if (!trimmedRhs) {
+      throw new Error(`Empty RHS for rule: "${lhs} -> ". Did you mean to use ε or eps?`);
+    }
+
     if (!start) start = lhs;
     varsSet.add(lhs);
     if (!productions.has(lhs)) productions.set(lhs, []);
-    for (const alt of rhsPart.split('|').map(s => s.trim())) {
-      if (!alt || alt === EPSILON || alt === 'eps' || alt === 'epsilon') { productions.get(lhs).push([EPSILON]); }
+    
+    for (const alt of trimmedRhs.split('|').map(s => s.trim())) {
+      if (!alt || alt === EPSILON || alt === 'eps' || alt === 'epsilon') { 
+        productions.get(lhs).push([EPSILON]); 
+      }
       else {
         const tokens = [];
         let i = 0;
@@ -287,9 +300,13 @@ export function parseTextGrammar(text) {
             tokens.push(v); varsSet.add(v);
           } else tokens.push(alt[i++]);
         }
-        productions.get(lhs).push(tokens);
+        if (tokens.length > 0) productions.get(lhs).push(tokens);
+        else productions.get(lhs).push([EPSILON]);
       }
     }
+  }
+  if (productions.size === 0) {
+    throw new Error('No valid grammar rules found. Please check your syntax.');
   }
   const g = { variables: Array.from(varsSet).sort(), terminals: [], start: start || 'S', productions };
   updateSets(g);

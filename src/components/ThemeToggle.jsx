@@ -11,10 +11,8 @@ export default function ThemeToggle({ theme, toggleTheme }) {
       whileTap={{ scale: 0.96 }}
       onClick={toggleTheme}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="theme-toggle-pill"
       style={{
-        position: 'absolute',
-        top: '18px',
-        right: '24px',
         /* Saki: floating pill nav style */
         background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(18,18,18,0.05)',
         border: `1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(18,18,18,0.12)'}`,

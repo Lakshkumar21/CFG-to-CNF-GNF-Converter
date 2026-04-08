@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, CheckCircle2, XCircle, ChevronRight, Hash, GitBranch, Terminal } from 'lucide-react';
+import { Search, CheckCircle2, XCircle, ChevronRight, Hash, GitBranch, Terminal, Sparkles } from 'lucide-react';
 import { checkString, buildParseTree, getDerivationSteps } from '../utils/converter';
 
 // Simple SVG Tree Node Component
 const TreeNode = ({ node, x, y, xDiff, depth = 0 }) => {
   if (!node) return null;
   const isTerminal = node.terminal;
-  const childY = y + 70;
+  const childY = y + 80;
 
   return (
     <g>
@@ -17,13 +17,14 @@ const TreeNode = ({ node, x, y, xDiff, depth = 0 }) => {
           <React.Fragment key={i}>
             <motion.line
               initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.3 }}
-              transition={{ duration: 0.5, delay: depth * 0.2 }}
+              animate={{ pathLength: 1, opacity: 0.4 }}
+              transition={{ duration: 0.6, delay: depth * 0.15 }}
               x1={x} y1={y} x2={childX} y2={childY}
               stroke="var(--text-main)"
-              strokeWidth="1.5"
+              strokeWidth="2"
+              strokeDasharray="4 4"
             />
-            <TreeNode node={child} x={childX} y={childY} xDiff={xDiff * 0.5} depth={depth + 1} />
+            <TreeNode node={child} x={childX} y={childY} xDiff={xDiff * 0.55} depth={depth + 1} />
           </React.Fragment>
         );
       })}
@@ -31,19 +32,20 @@ const TreeNode = ({ node, x, y, xDiff, depth = 0 }) => {
       <motion.g
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', damping: 12, delay: depth * 0.2 }}
+        transition={{ type: 'spring', damping: 15, delay: depth * 0.15 }}
       >
         <circle
-          cx={x} cy={y} r="18"
-          fill={isTerminal ? "rgba(245, 158, 11, 0.15)" : "var(--accent-primary)"}
-          stroke={isTerminal ? "var(--accent-secondary)" : "rgba(255,255,255,0.1)"}
+          cx={x} cy={y} r="20"
+          fill={isTerminal ? "var(--bg-glass-active)" : "var(--accent-primary)"}
+          stroke={isTerminal ? "var(--accent-secondary)" : "transparent"}
           strokeWidth="2"
+          filter="url(#nodeShadow)"
         />
         <text
           x={x} y={y} dy="5"
           textAnchor="middle"
           fill={isTerminal ? "var(--accent-secondary)" : "var(--btn-fill-text)"}
-          style={{ fontSize: '11px', fontWeight: 800, fontFamily: 'monospace' }}
+          style={{ fontSize: '12px', fontWeight: 900, fontFamily: 'Inter, monospace' }}
         >
           {node.sym === '\u03B5' ? 'ε' : node.sym}
         </text>
@@ -95,16 +97,22 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
 
   return (
     <div className="glass-panel" style={{ padding: '32px', marginBottom: '20px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '6px' }}>
-          CYK String Membership Test
-        </h3>
-        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Test if a string belongs to the language defined by this grammar.
-        </p>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Sparkles size={20} style={{ color: 'var(--accent-primary)' }} />
+            Testing Playground
+          </h3>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '500px', lineHeight: '1.6' }}>
+            Verify if a string belongs to the language. Using the <strong>internally generated CNF</strong> for high-performance membership testing (CYK).
+          </p>
+        </div>
+        <div style={{ background: 'var(--bg-glass-active)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-glass)', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          CYK Engine v1.0
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+      <div className="playground-input-group" style={{ marginBottom: '24px' }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Hash
             size={16}
@@ -117,14 +125,13 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
             onChange={(e) => setInputString(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleParse()}
             className="glass-input"
-            style={{ paddingLeft: '40px' }}
+            style={{ paddingLeft: '40px', width: '100%' }}
           />
         </div>
         <button
           onClick={handleParse}
           disabled={isParsing || !cnfGrammar}
-          className="btn-primary"
-          style={{ padding: '12px 24px' }}
+          className="btn-primary playground-test-btn"
         >
           {isParsing ? <div className="spin" style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.1)', borderTopColor: 'currentColor', borderRadius: '50%' }} /> : 'Test String'}
         </button>
@@ -178,7 +185,7 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
             </div>
 
             {/* CYK Table Render */}
-            <div style={{ overflowX: 'auto', marginBottom: '32px' }}>
+            <div className="cyk-table-wrapper" style={{ overflowX: 'auto', marginBottom: '32px', borderRadius: '12px' }}>
               <table className="cyk-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '300px' }}>
                 <thead>
                   <tr>
@@ -199,7 +206,12 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
                         {Array.from({ length: inputString.length }).map((_, pos) => {
                           const j = pos + len - 1;
                           if (j >= inputString.length) return <td key={pos}></td>;
-                          const vars = Array.from(result.table[len][pos]).sort();
+                          
+                          // Safety check: ensure table entry exists (prevents crash during rapid typing/HMR)
+                          const tableCell = result.table && result.table[len] && result.table[len][pos];
+                          if (!tableCell) return <td key={pos}></td>;
+
+                          const vars = Array.from(tableCell).sort();
                           const isStart = len === inputString.length && pos === 0 && vars.includes(gInternal.start);
                           return (
                             <td key={pos} style={{ padding: '8px', textAlign: 'center' }}>
@@ -249,13 +261,15 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
                     marginBottom: '32px', fontSize: '0.85rem', fontFamily: 'monospace'
                   }}>
                     {result.derivation.map((step, i) => (
-                      <React.Fragment key={i}>
-                        {i > 0 && <span style={{ opacity: 0.3 }}>⇒</span>}
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {i > 0 && <span style={{ opacity: 0.3, fontSize: '1.1rem' }}>⇒</span>}
                         <span style={{
-                          padding: '4px 8px', borderRadius: '6px',
-                          background: i === result.derivation.length - 1 ? "rgba(16,185,129,0.1)" : "transparent",
+                          padding: '6px 12px', borderRadius: '8px',
+                          background: i === result.derivation.length - 1 ? "rgba(16,185,129,0.08)" : "var(--bg-glass-subtle)",
                           color: i === result.derivation.length - 1 ? "#10b981" : "var(--text-main)",
-                          fontWeight: i === result.derivation.length - 1 ? 700 : 400
+                          fontWeight: i === result.derivation.length - 1 ? 800 : 400,
+                          border: `1px solid ${i === result.derivation.length - 1 ? 'rgba(16,185,129,0.2)' : 'var(--border-glass)'}`,
+                          boxShadow: i === result.derivation.length - 1 ? '0 4px 12px rgba(16,185,129,0.1)' : 'none'
                         }}>
                           {step.split('').map((char, ci) => (
                             <span key={ci} style={{
@@ -265,7 +279,7 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
                             </span>
                           ))}
                         </span>
-                      </React.Fragment>
+                      </div>
                     ))}
                   </div>
 
@@ -276,6 +290,11 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
 
                   <div style={{ display: 'flex', justifyContent: 'center', overflowX: 'auto', padding: '20px 0' }}>
                     <svg width={Math.max(400, inputString.length * 100)} height={inputString.length * 80 + 100}>
+                      <defs>
+                        <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
+                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
+                        </filter>
+                      </defs>
                       <TreeNode
                          node={result.tree}
                          x={Math.max(200, inputString.length * 50)}
