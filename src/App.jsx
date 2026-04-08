@@ -37,6 +37,7 @@ function App() {
   const handleConvert = (grammarConfig, type) => {
     setError(null);
     setSteps([]);
+    setCnfGrammar(null);
     setLastAction(type);
     setIsLoading(true);
 
@@ -44,8 +45,14 @@ function App() {
       try {
         const outputSteps = type === 'gnf' ? convertToGNF(grammarConfig) : convertToCNF(grammarConfig);
         setSteps(outputSteps);
-        if (type === 'cnf' && outputSteps.length > 0) {
-          setCnfGrammar(outputSteps[outputSteps.length - 1].grammar);
+        if (outputSteps.length > 0) {
+          if (type === 'cnf') {
+            setCnfGrammar(outputSteps[outputSteps.length - 1].grammar);
+          } else if (type === 'gnf') {
+            // In GNF pipeline, Step 5 is the CNF preparation step which we can use for CYK
+            const cnfStep = outputSteps.find(s => s.title.includes('CNF preparation') || s.title.includes('Step 5'));
+            if (cnfStep) setCnfGrammar(cnfStep.grammar);
+          }
         }
         setError(null);
       } catch (err) {
@@ -102,7 +109,7 @@ function App() {
                 <motion.div key="converter" className="converter-layout" {...pageVariants}>
                   {/* Hero Section Simplified */}
                   <div className="converter-hero">
-                    <h1 className="heading-xl">Live Prototyping</h1>
+                    <h1 className="heading-xl">CFG Transformation Portal</h1>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
                       Enter your CFG below to witness real-time step-by-step transformation.
                     </p>
@@ -131,9 +138,31 @@ function App() {
                         <p style={{ fontSize: '0.9rem' }}>Input rules and choose your target normal form.</p>
                       </motion.div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {steps.map((step, index) => <GrammarStep key={index} step={step} isActive />)}
-                        {cnfGrammar && <StringParser cnfGrammar={cnfGrammar} />}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        {/* Conversion Steps Section */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                            <div style={{ height: '1px', flex: 1, background: 'var(--border-glass)' }} />
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                              Transformation Steps
+                            </span>
+                            <div style={{ height: '1px', flex: 1, background: 'var(--border-glass)' }} />
+                          </div>
+                          {steps.map((step, index) => <GrammarStep key={index} step={step} isActive />)}
+                        </div>
+
+                        {/* Testing Playground Section */}
+                        <AnimatePresence>
+                          {cnfGrammar && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.4 }}
+                            >
+                              <StringParser cnfGrammar={cnfGrammar} />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )}
                   </div>
