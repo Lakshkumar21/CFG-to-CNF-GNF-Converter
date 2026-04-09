@@ -308,6 +308,19 @@ export function parseTextGrammar(text) {
   if (productions.size === 0) {
     throw new Error('No valid grammar rules found. Please check your syntax.');
   }
+
+  // Final check: Look for undefined non-terminals (variables used in RHS but never defined on LHS)
+  const definedVars = new Set(productions.keys());
+  for (const [lhs, ps] of productions) {
+    for (const p of ps) {
+      for (const token of p) {
+        if (token !== EPSILON && /^[A-Z]/.test(token) && !definedVars.has(token)) {
+          throw new Error(`Undefined variable: "${token}". You used "${token}" in the rule for "${lhs}", but never defined a production for it (e.g., ${token} -> ...).`);
+        }
+      }
+    }
+  }
+
   const g = { variables: Array.from(varsSet).sort(), terminals: [], start: start || 'S', productions };
   updateSets(g);
   return g;
