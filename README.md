@@ -12,9 +12,9 @@
 ---
 
 ### 📖 Description
-This project was developed as a comprehensive tool to help students and researchers understand the mathematical transformations required to convert a Context-Free Grammar (CFG) into standardized forms. The application performs rigorous transformations and displays every intermediate grammar step, providing a clear visual path from an arbitrary CFG to its **Chomsky Normal Form (CNF)** or **Greibach Normal Form (GNF)**.
+This project was developed as a comprehensive, product-grade tool to help students, teaching assistants, and researchers understand the mathematical transformations required to convert a Context-Free Grammar (CFG) into standardized forms. The application performs rigorous transformations and displays every intermediate grammar step, providing a clear visual path from an arbitrary CFG to its **Chomsky Normal Form (CNF)** or **Greibach Normal Form (GNF)**.
 
-The goal is to provide a transparent look into the systematic algorithms used in theoretical computer science and modern parsing techniques.
+Beyond simple conversion, the portal features a **CYK Engine Testing Playground** to verify string membership, visualizes complex syntax via **Adaptive Parse Trees**, and offers a **1-Click Academic Export** generating mathematically flawless LaTeX formatting for immediate use in research papers and homework assignments.
 
 ---
 
@@ -22,10 +22,11 @@ The goal is to provide a transparent look into the systematic algorithms used in
 *   **Dual Pipeline Conversion**:
     *   **6-Step CNF Pipeline**: Start Symbol Augmentation, ε-Elimination, Unit Removal, Useless Symbol Removal, Terminal Replacement, and Binarization.
     *   **9-Step GNF Pipeline**: Full Greibach ordering including variable indexing ($A_i < A_j$), indirect cycle detection, direct left-recursion removal ($Z_i$), and forward/backward substitution.
-*   **Step-by-Step Visualization**: Every mathematical operation is tracked and displayed as an individual "Step Card" showing the state of the grammar at that precise moment.
-*   **Theory Portal**: Integrated educational pages explaining the mathematical "What" and "How" of each normalization form.
-*   **Dual Input Modes**: Use a professional **Text Editor** for bulk rules or a **Visual Form** for structured input.
-*   **Premium "Saki-Inspired" Design**: Minimalist, high-contrast monochrome aesthetic with fluid animations and responsive glassmorphism.
+*   **CYK Testing Playground**: Input any string to verify its membership dynamically against the internally generated CNF rule set. Generates standard CYK DP tables.
+*   **Visual Parse Trees & Derivations**: View visually stunning, non-overlapping SVG Parse Trees and Leftmost Derivation paths for any accepted string.
+*   **One-Click Academic Export (LaTeX)**: Saves 30+ minutes of manual formatting by allowing users to click a single "LaTeX" button to copy any conversion step directly into `\begin{align*}` math blocks, or copy entire Parse Trees directly into `tikz-qtree` format for seamless pasting into Overleaf.
+*   **Step-by-Step Transparency**: Every mathematical operation is tracked and displayed as an individual "Step Card" exposing nullable variables, unit closures, generating sets, etc.
+*   **Premium "Saki-Inspired" Design**: Minimalist, high-contrast monochrome aesthetic with fluid animations, auto-dark mode, and responsive glassmorphism.
 
 ---
 
