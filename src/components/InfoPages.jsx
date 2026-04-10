@@ -11,48 +11,110 @@ const transitionAttr = { duration: 0.4, ease: [0.16, 1, 0.3, 1] };
 
 export function Home() {
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" transition={transitionAttr} className="home-container">
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" transition={transitionAttr} className="home-container" style={{ paddingBottom: '60px' }}>
       <div className="hero-landing">
         <h1 className="heading-xl">
-          Formal Grammar<br />
-          <span style={{ color: 'var(--text-muted)', fontWeight: 300 }}>Theory Portal</span>
+          CFG Conversion<br />
+          <span style={{ color: 'var(--text-muted)', fontWeight: 300 }}>& Transformation Portal</span>
         </h1>
         <div className="hero-divider" />
-        <p className="hero-subtitle">
-          A comprehensive environment for studying, converting, and parsing Context-Free Grammars. 
-          Built for mathematical precision and clarity.
+        <p className="hero-subtitle" style={{ fontSize: '1.1rem', maxWidth: '700px' }}>
+          An advanced educational tool designed to demystify <strong>Automata Theory</strong> through 
+          mathematical precision, real-time visualization, and step-by-step logic.
         </p>
       </div>
 
       <div className="features-grid">
         <div className="feature-card glass-panel">
           <div className="feature-icon">CNF</div>
-          <h3>Chomsky Normal Form</h3>
-          <p>Transform any CFG into a binary tree structure. Optimal for CYK parsing algorithms.</p>
+          <h3>Theory to Logic</h3>
+          <p>Translate abstract grammar rules into binary-decision trees optimized for algorithmic recognition.</p>
         </div>
         <div className="feature-card glass-panel">
           <div className="feature-icon">GNF</div>
-          <h3>Greibach Normal Form</h3>
-          <p>Convert grammars to a terminal-first format. The foundation for Pushdown Automata transitions.</p>
+          <h3>Automata Bridge</h3>
+          <p>Construct terminal-first rules that form the direct blueprint for Pushdown Automata (PDA) transitions.</p>
         </div>
         <div className="feature-card glass-panel">
           <div className="feature-icon">CYK</div>
-          <h3>String Parsing</h3>
-          <p>Test string membership with visual CYK tables, parse trees, and leftmost derivations.</p>
+          <h3>Visual Parsing</h3>
+          <p>Witness the Cocke-Younger-Kasami engine in action with interactive tables and adaptive parse trees.</p>
+        </div>
+        <div className="feature-card glass-panel">
+          <div className="feature-icon" style={{ background: 'var(--accent-primary)', color: 'var(--btn-fill-text)' }}>LaTeX</div>
+          <h3>Academic Export</h3>
+          <p>Instantly copy derived grammar forms into LaTeX math blocks for seamless pasting into Overleaf and homework assignments.</p>
         </div>
       </div>
 
-      <div className="glass-panel" style={{ padding: '40px', marginTop: '40px' }}>
-        <h2 style={{ marginBottom: '20px' }}>What is this Project?</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.8 }}>
-          This portal is designed to provide a hands-on learning experience for Computer Science students and researchers exploring <strong>Automata Theory and Formal Languages (TAFL)</strong>. 
-          By visualizing the complex transformations from CFG to CNF and GNF, we make abstract concepts tangible and easier to grasp.
-        </p>
-        <div className="info-divider" />
-        <div className="project-meta">
-          <p><strong>Developed by:</strong> Laksh Kumar</p>
-          <p><strong>Roll No:</strong> 2024UCM2375</p>
+      <div className="glass-panel" style={{ padding: '48px', marginTop: '40px', background: 'var(--bg-glass-active)' }}>
+        <h2 style={{ marginBottom: '24px', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em' }}>What this Software Intends to Do</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+          <div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.8, marginBottom: '20px' }}>
+              The study of <strong>Theory of Automata and Formal Languages (TAFL)</strong> often feels abstract and disconnected from practical coding. This software acts as a specialized bridge, transforming clinical mathematical definitions into interactive, visual experiences.
+            </p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.8 }}>
+              Whether you are a student struggling with manual <em>Unit Production</em> removal or a researcher testing complex grammars, this portal provides instant, error-free results with the mathematical derivation shown at every stage.
+            </p>
+          </div>
+          <div style={{ background: 'var(--bg-glass)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)' }}>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Core Objectives</h4>
+            <ul style={{ paddingLeft: '20px', color: 'var(--text-main)', fontSize: '0.85rem', lineHeight: 1.9, margin: 0 }}>
+              <li>Visualize 6-step CNF and 9-step GNF pipelines.</li>
+              <li>Provide a "No-Experience-Required" entry point to TAFL.</li>
+              <li>Ensure 100% mathematical correctness in transformations.</li>
+              <li>Render adaptive, non-overlapping derivation trees for any accepted string.</li>
+            </ul>
+          </div>
         </div>
+      </div>
+
+      <div style={{ marginTop: '48px' }}>
+        <h2 style={{ paddingLeft: '12px', marginBottom: '24px', fontSize: '1.5rem', fontWeight: 900 }}>For Beginners: How can this help?</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {[
+            {
+              title: "Step-by-Step Transparency",
+              desc: "Don't know how to convert? Our 'Visual Form' tab breaks down every single subtraction, substitution, and addition made during the conversion process so you can learn while you use it."
+            },
+            {
+              title: "Error Prevention",
+              desc: "Manual grammar conversion is notoriously error-prone. One missed nullable variable can ruin a 20-minute derivation. This tool ensures your logic is sound from Step 1 to Step 9."
+            },
+            {
+              title: "Instant Verification",
+              desc: "Quickly test strings using the Testing Playground. If a string is accepted, we generate the full Parse Tree and Leftmost Derivation, helping you understand how the grammar reaches its final yield."
+            }
+          ].map((item, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: '20px', padding: '24px', background: 'var(--bg-glass)', borderRadius: '16px', border: '1px solid var(--border-glass)' }}>
+              <div style={{ width: '32px', height: '32px', background: 'var(--accent-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 900, color: 'var(--btn-fill-text)', flexShrink: 0 }}>
+                {idx + 1}
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '1.1rem' }}>{item.title}</h4>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '48px', padding: '32px', background: 'var(--bg-glass-active)', borderRadius: '16px', borderLeft: '4px solid var(--accent-primary)', borderTop: '1px solid var(--border-glass)', borderRight: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)', display: 'flex', gap: '24px', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ margin: '0 0 8px 0', fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>The Product Edge: Academic Export</h2>
+          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>
+            <strong>Why this is a product:</strong> It saves users 30+ minutes of formatting LaTeX geometry and logic equations manually, making this tool an indispensable part of their homework/teaching workflow. 
+            Instantly port your complex trees to Overleaf with a single click.
+          </p>
+        </div>
+        <div style={{ background: 'var(--accent-primary)', color: 'var(--btn-fill-text)', padding: '12px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+          LaTeX Ready
+        </div>
+      </div>
+
+      <div style={{ marginTop: '60px', borderTop: '1px solid var(--border-glass)', paddingTop: '32px', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}><strong>Developed by:</strong> Laksh Kumar (2024UCM2375)</p>
       </div>
     </motion.div>
   );
@@ -109,29 +171,47 @@ export function StepsCNF() {
       </p>
       
       <ol style={{ paddingLeft: '24px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '24px' }}>
-        <li style={{ marginBottom: '16px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Preprocessing (Start Symbol Augmentation):</strong>
-          <br/>To ensure the start variable never appears on the right-hand side, a new start symbol <em>S<sub>0</sub></em> is introduced with the production <em>S<sub>0</sub> &rarr; S</em>.
+          <br/>To ensure the start variable never appears on the right-hand side, a new start symbol <em>S<sub>0</sub></em> is introduced.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>S &rarr; aS | a</em> &nbsp;&rarr;&nbsp; <em>S<sub>0</sub> &rarr; S, S &rarr; aS | a</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '16px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Epsilon (&epsilon;) Elimination:</strong>
-          <br/>Nullable variables are identified. New productions are generated by calculating the power-set of all possible combinations for each rule containing nullable variables.
+          <br/>Nullable variables are identified and replaced with all possible combinations.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>S &rarr; AB, A &rarr; a | &epsilon;</em> &nbsp;&rarr;&nbsp; <em>S &rarr; AB | B, A &rarr; a</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '16px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Unit Production Elimination:</strong>
-          <br/>Unit productions (A &rarr; B) are removed by computing the transitive closure of all unit chains and replacing them with non-unit terminal/binary derivations.
+          <br/>Unit productions (A &rarr; B) are removed by substituting derivations directly.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; B, B &rarr; a | b</em> &nbsp;&rarr;&nbsp; <em>A &rarr; a | b</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '16px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Useless Symbol Removal:</strong>
-          <br/>Non-generating variables (those that cannot derive a terminal string) and unreachable variables (those that cannot be reached from the start symbol) are pruned.
+          <br/>Non-generating variables and unreachable variables are pruned.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>S &rarr; A, B &rarr; b</em> (B unreachable) &nbsp;&rarr;&nbsp; Prune B.
+          </div>
         </li>
-        <li style={{ marginBottom: '16px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Terminal Replacement:</strong>
-          <br/>For any production rule with length &ge; 2, every terminal <em>a</em> is replaced by a unique proxy variable <em>T<sub>a</sub></em> to ensure no terminals mix with variables.
+          <br/>In rules with length &ge; 2, terminals are replaced by unique proxy variables.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; aB</em> &nbsp;&rarr;&nbsp; <em>A &rarr; T<sub>a</sub>B, T<sub>a</sub> &rarr; a</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '8px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Binarization:</strong>
-          <br/>Long productions are broken down into cascading binary chains. For example, <em>A &rarr; BCD</em> is transformed into <em>A &rarr; BX</em> and <em>X &rarr; CD</em>.
+          <br/>Long productions are broken down into cascading binary chains.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; BCD</em> &nbsp;&rarr;&nbsp; <em>A &rarr; BX, X &rarr; CD</em>
+          </div>
         </li>
       </ol>
     </motion.div>
@@ -170,41 +250,68 @@ export function StepsGNF() {
       </p>
       
       <ol style={{ paddingLeft: '24px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '24px' }}>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Preprocessing:</strong>
-          <br/>Initial grammar cleanup and addition of a root start symbol to isolate derivation cycles.
+          <br/>Addition of a root start symbol to isolate derivation cycles.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>S<sub>0</sub> &rarr; S</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Epsilon (&epsilon;) Elimination:</strong>
-          <br/>Removal of all empty transitions by expanding rule combinations.
+          <br/>Removal of empty transitions by expanding rule combinations.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; BC | &epsilon;</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Unit Production Removal:</strong>
           <br/>Substitution of all single-variable rules with their terminal or binary leaves.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; B, B &rarr; a</em> &nbsp;&rarr;&nbsp; <em>A &rarr; a</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Useless Symbol Removal:</strong>
-          <br/>Pruning of non-generating and unreachable variables to reduce state complexity.
+          <br/>Pruning of non-generating and unreachable variables.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> Pruning variables that never derive terminals.
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>CNF Preparation:</strong>
-          <br/>Converting the grammar to Chomsky Normal Form (binarization) to standardize the rule length.
+          <br/>Converting the grammar to Chomsky Normal Form to standardize rule length.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; BC</em> or <em>A &rarr; a</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Variable Ordering:</strong>
-          <br/>Variables are strictly ordered (A<sub>1</sub> &lt; A<sub>2</sub> &lt; ... &lt; A<sub>n</sub>) to detect indirect cycles.
+          <br/>Variables are ordered (A<sub>1</sub>, A<sub>2</sub>...) to detect and resolve indirect recursion.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A<sub>1</sub> &rarr; A<sub>2</sub>X</em> where 1 &lt; 2.
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Left Recursion Removal:</strong>
-          <br/>Direct left recursion (A<sub>i</sub> &rarr; A<sub>i</sub> &alpha;) is eliminated using new sub-indexed variables (Z<sub>i</sub>).
+          <br/>Eliminating direct left recursion (A &rarr; A&alpha;) by introducing Z variables.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; Aa | b</em> becomes <em>A &rarr; b | bZ, Z &rarr; a | aZ</em>
+          </div>
         </li>
-        <li style={{ marginBottom: '12px' }}>
+        <li style={{ marginBottom: '24px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Leading Variable Substitution:</strong>
-          <br/>Forward and backward substitution from A<sub>n</sub> down to A<sub>1</sub> to force all rules to begin with terminals.
+          <br/>Substituting variables to ensure rules begin with a terminal or a higher-indexed variable.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A<sub>1</sub> &rarr; A<sub>2</sub>X, A<sub>2</sub> &rarr; a</em> &nbsp;&rarr;&nbsp; <em>A<sub>1</sub> &rarr; aX</em>
+          </div>
         </li>
         <li style={{ marginBottom: '8px' }}>
           <strong style={{ color: 'var(--text-main)' }}>Final GNF Enforcement:</strong>
-          <br/>Propagating terminal-first substitutions across all rules to satisfy Greibach's formal criteria.
+          <br/>Ensuring every rule strictly starts with a terminal followed by non-terminals.
+          <div style={{ background: 'var(--bg-glass-active)', padding: '12px 18px', borderRadius: '12px', marginTop: '10px', border: '1px solid var(--border-glass)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: '800' }}>Ex: </span> <em>A &rarr; aBC...</em>
+          </div>
         </li>
       </ol>
     </motion.div>

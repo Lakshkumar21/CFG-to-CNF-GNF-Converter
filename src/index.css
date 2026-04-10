@@ -1040,6 +1040,41 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 
+.step-metadata-viz {
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 16px;
+}
+
+.meta-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass-active);
+  transition: all 0.2s ease;
+}
+
+.meta-tag:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.meta-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-tag.nullable { border-left: 3px solid #ff6b6b; }
+.meta-tag.closures { border-left: 3px solid #4834d4; }
+.meta-tag.generating { border-left: 3px solid #6ab04c; }
+.meta-tag.reachable { border-left: 3px solid #f0932b; }
+
 @media (max-width: 768px) {
   .app-container {
     padding: 24px 16px 80px;
@@ -1146,4 +1181,57 @@ h1, h2, h3, h4, h5, h6 {
   .del-btn  { grid-area: del; }
   .rule-rhs { grid-area: rhs; }
   .rule-arrow-icon { display: none; }
+}
+/* ========================
+   TREE VISUALIZATION CONTROLS
+   ======================== */
+.icon-btn-pill {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-main);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.icon-btn-pill:hover {
+  opacity: 1;
+  background: var(--bg-glass-active);
+  border-color: var(--border-glass);
+  transform: scale(1.1);
+}
+
+.btn-reset-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-reset-pill:hover {
+  background: var(--accent-primary);
+  color: var(--btn-fill-text);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-reset-pill span {
+  white-space: nowrap;
 }

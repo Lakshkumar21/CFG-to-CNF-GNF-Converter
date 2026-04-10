@@ -258,8 +258,16 @@ function gToUIDict(g) {
   return dict;
 }
 
-function buildStep(title, explanation, info, g, isChanged = true) {
-  return { title, description: explanation + (info ? `\n\n${info}` : ''), grammar: gToUIDict(g), validationPassed: true, validationErrors: [], isChanged };
+function buildStep(title, explanation, info, g, isChanged = true, metadata = null) {
+  return { 
+    title, 
+    description: explanation + (info ? `\n\n${info}` : ''), 
+    grammar: gToUIDict(g), 
+    validationPassed: true, 
+    validationErrors: [], 
+    isChanged,
+    metadata 
+  };
 }
 
 export function parseTextGrammar(text) {
@@ -298,7 +306,15 @@ export function parseTextGrammar(text) {
             let v = alt[i++];
             while (i < alt.length && /[0-9']/.test(alt[i])) v += alt[i++];
             tokens.push(v); varsSet.add(v);
-          } else tokens.push(alt[i++]);
+          } else {
+            // Collect terminal token (sequence of non-space, non-uppercase characters)
+            let t = "";
+            while (i < alt.length && !/\s/.test(alt[i]) && !/[A-Z]/.test(alt[i])) {
+              t += alt[i++];
+            }
+            if (t) tokens.push(t);
+            else i++;
+          }
         }
         if (tokens.length > 0) productions.get(lhs).push(tokens);
         else productions.get(lhs).push([EPSILON]);
@@ -365,16 +381,53 @@ export function convertToCNF(input) {
   steps.push(buildStep('Step 1: Preprocessing', 'Added a new start symbol S0 to ensure the start variable never appears on the right-hand side.', null, g));
 
   // 2. ε-elimination
+  const nullable = findNullable(g);
   doEpsilonElim(g);
-  steps.push(buildStep('Step 2: ε-elimination', 'Identified nullable variables and added productions for every combination of their presence in each rule.', null, g));
+  steps.push(buildStep('Step 2: ε-elimination', 'Identified nullable variables and added productions for every combination of their presence in each rule.', null, g, true, { nullable: Array.from(nullable) }));
 
   // 3. Unit production removal
+  const closures = {};
+  for (const v of g.variables) {
+    const c = new Set([v]), q = [v];
+    while(q.length) {
+      const cur = q.shift();
+      const ps = g.productions.get(cur) || [];
+      for (const p of ps) {
+        if (p.length === 1 && g.variables.includes(p[0]) && !c.has(p[0])) { c.add(p[0]); q.push(p[0]); }
+      }
+    }
+    if (c.size > 1) closures[v] = Array.from(c);
+  }
   elimUnit(g);
-  steps.push(buildStep('Step 3: Unit production removal', 'Computed transitive closures of unit productions and replaced chain rules with the final non-unit derivations.', null, g));
+  steps.push(buildStep('Step 3: Unit production removal', 'Computed transitive closures of unit productions and replaced chain rules with the final non-unit derivations.', null, g, true, { unitClosures: closures }));
 
   // 4. Useless symbol removal
+  const genSet = new Set();
+  let ch = true;
+  while (ch) {
+    ch = false;
+    for (const [v, ps] of g.productions) {
+      if (genSet.has(v)) continue;
+      for (const p of ps) {
+        if (p.every(s => s === EPSILON || g.terminals.includes(s) || genSet.has(s))) {
+          genSet.add(v); ch = true; break;
+        }
+      }
+    }
+  }
+  const reachingSet = new Set([g.start]), reachableQ = [g.start];
+  while (reachableQ.length) {
+    const v = reachableQ.shift();
+    const ps = g.productions.get(v) || [];
+    for (const p of ps) {
+      for (const s of p) { if (g.variables.includes(s) && !reachingSet.has(s)) { reachingSet.add(s); reachableQ.push(s); } }
+    }
+  }
   elimUseless(g);
-  steps.push(buildStep('Step 4: Useless symbol removal', 'Removed non-generating variables (those that cannot lead to terminals) and unreachable symbols.', null, g));
+  steps.push(buildStep('Step 4: Useless symbol removal', 'Removed non-generating variables (those that cannot lead to terminals) and unreachable symbols.', null, g, true, { 
+    generating: Array.from(genSet),
+    reachable: Array.from(reachingSet)
+  }));
 
   // 5. Terminal replacement
   terminalReplace(g);
@@ -504,14 +557,19 @@ export function convertToGNF(input) {
  * @returns {Object} { accepted: boolean, table: Set[][] }
  */
 export function checkString(g, input) {
-  // Handle empty string
-  if (!input || input === EPSILON) {
+  // Tokenize input: if it contains spaces, use them as delimiters. Otherwise, treat each character as a token.
+  // We trim and filter to remove empty tokens.
+  const tokens = input.includes(' ') 
+    ? input.split(/\s+/).filter(Boolean) 
+    : input.replace(/\s+/g, '').split('');
+
+  const n = tokens.length;
+  if (n === 0) {
     const startRules = g.productions.get(g.start) || [];
     const generatesEpsilon = startRules.some(p => p.length === 1 && p[0] === EPSILON);
     return { accepted: generatesEpsilon, table: [] };
   }
 
-  const n = input.length;
   // Initialize CYK table: table[length][start_pos]
   const table = Array.from({ length: n + 1 }, () => 
     Array.from({ length: n }, () => new Set())
@@ -519,10 +577,10 @@ export function checkString(g, input) {
 
   // Fill length 1
   for (let i = 0; i < n; i++) {
-    const char = input[i];
+    const token = tokens[i];
     for (const [v, ps] of g.productions) {
       for (const p of ps) {
-        if (p.length === 1 && p[0] === char) {
+        if (p.length === 1 && p[0] === token) {
           table[1][i].add(v);
         }
       }
@@ -552,19 +610,26 @@ export function checkString(g, input) {
 
   return {
     accepted: table[n][0].has(g.start),
-    table: table
+    table: table,
+    tokens: tokens
   };
 }
 
 /**
  * Backtracks through the CYK table to build a derivation tree.
+ * @param {Object} g - Grammar in CNF
+ * @param {Set[][]} table - CYK table
+ * @param {string[]} tokens - Array of input tokens
+ * @param {number} len - Current substring length
+ * @param {number} pos - Current substring position
+ * @param {string} variable - Current Non-terminal variable
  */
-export function buildParseTree(g, table, input, len, pos, variable) {
+export function buildParseTree(g, table, tokens, len, pos, variable) {
   if (len === 1) {
-    const char = input[pos];
+    const token = tokens[pos];
     return {
       sym: variable,
-      children: [{ sym: char, terminal: true }],
+      children: [{ sym: token, terminal: true }],
       terminal: false
     };
   }
@@ -575,8 +640,8 @@ export function buildParseTree(g, table, input, len, pos, variable) {
       if (p.length === 2) {
         const [B, C] = p;
         if (table[k][pos].has(B) && table[len - k][pos + k].has(C)) {
-          const leftNode = buildParseTree(g, table, input, k, pos, B);
-          const rightNode = buildParseTree(g, table, input, len - k, pos + k, C);
+          const leftNode = buildParseTree(g, table, tokens, k, pos, B);
+          const rightNode = buildParseTree(g, table, tokens, len - k, pos + k, C);
           if (leftNode && rightNode) {
             return {
               sym: variable,
@@ -599,7 +664,7 @@ export function getDerivationSteps(tree) {
   const steps = [];
 
   function getSentential(nodes) {
-    return nodes.map(n => n.sym).join('');
+    return nodes.map(n => n.sym).join(' ');
   }
 
   let currentNodes = [tree];
