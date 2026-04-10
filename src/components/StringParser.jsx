@@ -1,51 +1,87 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, CheckCircle2, XCircle, ChevronRight, Hash, GitBranch, Terminal, Sparkles } from 'lucide-react';
+import { Search, CheckCircle2, XCircle, ChevronRight, Hash, GitBranch, Terminal, Sparkles, ZoomIn, ZoomOut, RotateCcw, Copy, Check } from 'lucide-react';
 import { checkString, buildParseTree, getDerivationSteps } from '../utils/converter';
+import { parseTreeToLatex } from '../utils/latexExport';
 
 // Simple SVG Tree Node Component
-const TreeNode = ({ node, x, y, xDiff, depth = 0 }) => {
+// Beautiful SVG Tree Node Component
+// Beautiful SVG Tree Node Component with Adaptive Layout
+const TreeNode = ({ node, x, y, allocatedWidth, depth = 0 }) => {
   if (!node) return null;
   const isTerminal = node.terminal;
-  const childY = y + 80;
+  const childY = y + 120; // Increased vertical spacing for clarity
+
+  // Use distinct colors for dark/light mode via CSS variables
+  const circleFill = isTerminal ? "rgba(16, 185, 129, 0.15)" : "var(--accent-primary)";
+  const circleStroke = isTerminal ? "#10b981" : "transparent";
+  const textFill = isTerminal ? "#10b981" : "var(--btn-fill-text)";
+
+  let currentXStart = x - allocatedWidth / 2;
 
   return (
     <g>
+      {/* Lines between nodes */}
       {node.children && node.children.map((child, i) => {
-        const childX = node.children.length === 1 ? x : (i === 0 ? x - xDiff : x + xDiff);
+        // Calculate child's horizontal share based on its subtree width
+        const childShare = (child.subtreeWidth / node.subtreeWidth) * allocatedWidth;
+        const childX = currentXStart + childShare / 2;
+        
+        // Update start for next sibling
+        const prevXStart = currentXStart;
+        currentXStart += childShare;
+
         return (
           <React.Fragment key={i}>
             <motion.line
               initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.4 }}
-              transition={{ duration: 0.6, delay: depth * 0.15 }}
+              animate={{ pathLength: 1, opacity: 0.6 }}
+              transition={{ duration: 0.7, delay: depth * 0.08, ease: "easeOut" }}
               x1={x} y1={y} x2={childX} y2={childY}
               stroke="var(--text-main)"
-              strokeWidth="2"
-              strokeDasharray="4 4"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray={isTerminal ? "none" : "4 4"}
+              style={{ opacity: 0.4 }}
             />
-            <TreeNode node={child} x={childX} y={childY} xDiff={xDiff * 0.55} depth={depth + 1} />
+            <TreeNode 
+              node={child} 
+              x={childX} 
+              y={childY} 
+              allocatedWidth={childShare} 
+              depth={depth + 1} 
+            />
           </React.Fragment>
         );
       })}
 
+      {/* The Node itself */}
       <motion.g
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', damping: 15, delay: depth * 0.15 }}
+        transition={{ type: 'spring', damping: 15, stiffness: 200, delay: depth * 0.08 }}
       >
+        <circle cx={x} cy={y} r="22" fill="var(--body-bg)" />
         <circle
-          cx={x} cy={y} r="20"
-          fill={isTerminal ? "var(--bg-glass-active)" : "var(--accent-primary)"}
-          stroke={isTerminal ? "var(--accent-secondary)" : "transparent"}
-          strokeWidth="2"
-          filter="url(#nodeShadow)"
+          cx={x} cy={y} r="22"
+          fill={circleFill}
+          stroke={circleStroke}
+          strokeWidth="2.5"
+          style={{ 
+            filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))',
+            backdropFilter: 'blur(4px)'
+          }}
         />
         <text
           x={x} y={y} dy="5"
           textAnchor="middle"
-          fill={isTerminal ? "var(--accent-secondary)" : "var(--btn-fill-text)"}
-          style={{ fontSize: '12px', fontWeight: 900, fontFamily: 'Inter, monospace' }}
+          fill={textFill}
+          style={{ 
+            fontSize: '13px', 
+            fontWeight: 900, 
+            fontFamily: 'Inter, monospace',
+            userSelect: 'none'
+          }}
         >
           {node.sym === '\u03B5' ? 'ε' : node.sym}
         </text>
@@ -59,6 +95,17 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
   const [result, setResult] = useState(null);
   const [isParsing, setIsParsing] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [treeCopied, setTreeCopied] = useState(false);
+
+  const handleCopyTreeLatex = () => {
+    if (!result || !result.tree) return;
+    const latex = parseTreeToLatex(result.tree);
+    navigator.clipboard.writeText(latex);
+    setTreeCopied(true);
+    setTimeout(() => setTreeCopied(false), 2000);
+  };
 
   const gInternal = useMemo(() => {
     if (!cnfGrammar) return null;
@@ -79,13 +126,29 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
     setIsParsing(true);
     setResult(null);
 
+    // Recursive helper to calculate subtree widths for layout
+    const calculateSubtreeWidths = (node) => {
+      if (!node) return 0;
+      if (!node.children || node.children.length === 0) {
+        node.subtreeWidth = 1;
+        return 1;
+      }
+      let totalWidth = 0;
+      for (const child of node.children) {
+        totalWidth += calculateSubtreeWidths(child);
+      }
+      node.subtreeWidth = totalWidth;
+      return totalWidth;
+    };
+
     setTimeout(() => {
       const cykRes = checkString(gInternal, inputString.trim());
       let tree = null;
       let derivation = [];
 
       if (cykRes.accepted) {
-        tree = buildParseTree(gInternal, cykRes.table, inputString.trim(), inputString.trim().length, 0, gInternal.start);
+        tree = buildParseTree(gInternal, cykRes.table, cykRes.tokens, cykRes.tokens.length, 0, gInternal.start);
+        calculateSubtreeWidths(tree);
         derivation = getDerivationSteps(tree);
       }
 
@@ -122,7 +185,7 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
             type="text"
             placeholder="Enter string (e.g. aabb)"
             value={inputString}
-            onChange={(e) => setInputString(e.target.value)}
+            onChange={(e) => { setInputString(e.target.value); setResult(null); }}
             onKeyDown={(e) => e.key === 'Enter' && handleParse()}
             className="glass-input"
             style={{ paddingLeft: '40px', width: '100%' }}
@@ -271,11 +334,12 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
                           border: `1px solid ${i === result.derivation.length - 1 ? 'rgba(16,185,129,0.2)' : 'var(--border-glass)'}`,
                           boxShadow: i === result.derivation.length - 1 ? '0 4px 12px rgba(16,185,129,0.1)' : 'none'
                         }}>
-                          {step.split('').map((char, ci) => (
+                          {/* We don't split by character, we just render the step string */}
+                          {step.split(/(\s+|[A-Z][0-9']*)/).filter(Boolean).map((part, ci) => (
                             <span key={ci} style={{
-                              color: /^[A-Z]/.test(char) ? 'var(--accent-primary)' : 'var(--accent-secondary)'
+                              color: /^[A-Z]/.test(part) ? 'var(--accent-primary)' : 'var(--accent-secondary)'
                             }}>
-                              {char}
+                              {part}
                             </span>
                           ))}
                         </span>
@@ -283,25 +347,139 @@ const StringParser = ({ cnfGrammar, startSymbol = 'S' }) => {
                     ))}
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                    <GitBranch size={18} style={{ color: 'var(--accent-primary)' }} />
-                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Parse Tree Visualization</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <GitBranch size={18} style={{ color: 'var(--accent-primary)' }} />
+                      <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Parse Tree Visualization</h4>
+                    </div>
+                    
+                    {/* Enhanced Control Bar */}
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '4px', 
+                      background: 'var(--bg-glass)', 
+                      padding: '4px', 
+                      borderRadius: '14px', 
+                      border: '1px solid var(--border-glass)',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginRight: '8px', padding: '0 4px' }}>
+                        <button 
+                          onClick={() => setZoom(z => Math.max(0.1, z - 0.1))} 
+                          className="icon-btn-pill" 
+                          title="Zoom Out"
+                        >
+                          <ZoomOut size={14} />
+                        </button>
+                        <div style={{ 
+                          fontSize: '0.7rem', 
+                          fontWeight: 800, 
+                          minWidth: '42px', 
+                          textAlign: 'center',
+                          color: 'var(--text-main)',
+                          opacity: 0.8
+                        }}>
+                          {Math.round(zoom * 100)}%
+                        </div>
+                        <button 
+                          onClick={() => setZoom(z => Math.min(3, z + 0.1))} 
+                          className="icon-btn-pill" 
+                          title="Zoom In"
+                        >
+                          <ZoomIn size={14} />
+                        </button>
+                      </div>
+
+                      <div style={{ width: '1px', height: '16px', background: 'var(--border-glass)' }} />
+
+                      <button 
+                        onClick={() => { setZoom(1); setDragPosition({ x: 0, y: 0 }); }} 
+                        className="btn-reset-pill"
+                      >
+                        <RotateCcw size={14} />
+                        <span>Reset</span>
+                      </button>
+
+                      <div style={{ width: '1px', height: '16px', background: 'var(--border-glass)' }} />
+
+                      <button 
+                        onClick={handleCopyTreeLatex} 
+                        className="btn-reset-pill"
+                        style={{
+                          color: treeCopied ? '#10b981' : 'var(--accent-primary)',
+                          background: treeCopied ? 'rgba(16, 185, 129, 0.1)' : 'transparent'
+                        }}
+                      >
+                        {treeCopied ? <Check size={14} /> : <Copy size={14} />}
+                        <span>{treeCopied ? 'Copied!' : 'LaTeX'}</span>
+                      </button>
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'center', overflowX: 'auto', padding: '20px 0' }}>
-                    <svg width={Math.max(400, inputString.length * 100)} height={inputString.length * 80 + 100}>
-                      <defs>
-                        <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
-                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
-                        </filter>
-                      </defs>
-                      <TreeNode
-                         node={result.tree}
-                         x={Math.max(200, inputString.length * 50)}
-                         y={40}
-                         xDiff={inputString.length * 25}
-                      />
-                    </svg>
+                  <div 
+                    className="tree-view-viewport"
+                    style={{ 
+                      position: 'relative', 
+                      width: '100%', 
+                      height: '600px',
+                      overflow: 'hidden', 
+                      background: 'var(--bg-glass-subtle)', 
+                      borderRadius: '24px',
+                      border: '1px solid var(--border-glass)',
+                      boxShadow: 'inset 0 4px 20px rgba(0,0,0,0.3)',
+                      cursor: 'grab'
+                    }}
+                    onWheel={(e) => {
+                      if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                        setZoom(z => Math.max(0.1, Math.min(3, z + delta)));
+                      }
+                    }}
+                  >
+                    <motion.div
+                      drag
+                      dragMomentum={false}
+                      dragElastic={0}
+                      animate={{ 
+                        scale: zoom, 
+                        x: dragPosition.x, 
+                        y: dragPosition.y 
+                      }}
+                      style={{ 
+                        width: '3000px', 
+                        height: '2000px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'center',
+                        position: 'absolute',
+                        top: '40px', // Start near the top of the viewport
+                        left: 'calc(50% - 1500px)',
+                        cursor: 'grabbing',
+                        transformOrigin: 'top center'
+                      }}
+                      onDragEnd={(e, info) => {
+                        setDragPosition(prev => ({ 
+                          x: prev.x + info.offset.x, 
+                          y: prev.y + info.offset.y 
+                        }));
+                      }}
+                    >
+                      <svg 
+                        width="3000" 
+                        height="2000"
+                        viewBox="0 0 3000 2000"
+                        style={{ overflow: 'visible' }}
+                      >
+                        <TreeNode
+                           node={result.tree}
+                           x={1500}
+                           y={80}
+                           allocatedWidth={Math.max(800, result.tokens.length * 100)}
+                        />
+                      </svg>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>

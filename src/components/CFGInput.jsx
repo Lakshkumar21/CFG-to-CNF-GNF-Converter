@@ -216,31 +216,34 @@ export default function CFGInput({ onConvert, error, isLoading, lastAction }) {
         .tab-btn {
           padding: 8px 18px;
           border-radius: 9999px;
+          border: none;
           font-size: 0.8rem;
           font-weight: 700;
           color: var(--text-muted);
+          background: transparent;
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           display: flex;
           align-items: center;
           gap: 8px;
           text-transform: uppercase;
           letter-spacing: 0.02em;
+          cursor: pointer;
         }
         .tab-btn:hover {
           color: var(--text-main);
+          background: var(--bg-glass-active);
         }
         .tab-btn.active {
-          background: #ffffff !important;
-          color: #121212 !important;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          background: var(--btn-fill-bg) !important;
+          color: var(--btn-fill-text) !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .tab-btn:not(.active) {
-          color: rgba(255,255,255,0.7) !important;
-          background: transparent !important;
+          color: var(--text-muted) !important;
         }
         .tab-btn:not(.active):hover {
-          color: #ffffff !important;
-          background: rgba(255,255,255,0.1) !important;
+          color: var(--text-main) !important;
+          background: var(--bg-glass-active) !important;
         }
         .action-buttons-flex {
           display: flex;

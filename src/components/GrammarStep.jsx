@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Copy, Check } from 'lucide-react';
+import { grammarToLatex } from '../utils/latexExport';
 
 function renderProduction(symbols) {
   if (!symbols || symbols.length === 0) {
@@ -20,7 +22,17 @@ function renderProduction(symbols) {
 }
 
 export default function GrammarStep({ step }) {
+  const [copied, setCopied] = useState(false);
+
   if (!step) return null;
+
+  const handleCopyLatex = () => {
+    const latexStr = grammarToLatex(step.grammar);
+    navigator.clipboard.writeText(latexStr).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <motion.div
@@ -32,9 +44,24 @@ export default function GrammarStep({ step }) {
       className="glass-card step-card"
     >
       {/* Header row */}
-      <div className="step-card-header">
-        <h3 className="step-title">{step.title}</h3>
-        <span className="step-badge">Step</span>
+      <div className="step-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h3 className="step-title" style={{ margin: 0 }}>{step.title}</h3>
+          <span className="step-badge">Step</span>
+        </div>
+        <button
+          onClick={handleCopyLatex}
+          className="btn-reset-pill"
+          style={{
+            color: copied ? '#10b981' : 'var(--text-main)',
+            background: copied ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-glass-active)',
+            border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-glass)'}`
+          }}
+          title="Copy as LaTeX"
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+          <span>{copied ? 'Copied!' : 'LaTeX'}</span>
+        </button>
       </div>
 
       {/* Description block */}
@@ -42,6 +69,36 @@ export default function GrammarStep({ step }) {
         <div className="step-description">
           {step.description.split('\n').map((line, idx) =>
             line.trim() ? <p key={idx} style={{ marginBottom: '6px' }}>{line}</p> : null
+          )}
+        </div>
+      )}
+
+      {/* Algorithmic Metadata Visualization */}
+      {step.metadata && (
+        <div className="step-metadata-viz" style={{ marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {step.metadata.nullable && (
+            <div className="meta-tag nullable">
+              <span className="meta-label">Nullable:</span>
+              {step.metadata.nullable.length > 0 ? step.metadata.nullable.join(', ') : 'None'}
+            </div>
+          )}
+          {step.metadata.unitClosures && Object.keys(step.metadata.unitClosures).length > 0 && (
+            <div className="meta-tag closures">
+              <span className="meta-label">Unit Closures:</span>
+              {Object.entries(step.metadata.unitClosures).map(([v, c]) => `${v}→{${c.join(',')}}`).join('; ')}
+            </div>
+          )}
+          {step.metadata.generating && (
+            <div className="meta-tag generating">
+              <span className="meta-label">Generating:</span>
+              {step.metadata.generating.join(', ')}
+            </div>
+          )}
+          {step.metadata.reachable && (
+            <div className="meta-tag reachable">
+              <span className="meta-label">Reachable:</span>
+              {step.metadata.reachable.join(', ')}
+            </div>
           )}
         </div>
       )}
