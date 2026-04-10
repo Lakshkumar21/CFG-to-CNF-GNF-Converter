@@ -47,7 +47,20 @@ export function Home() {
         </div>
       </div>
 
-      <div className="glass-panel" style={{ padding: '48px', marginTop: '40px', background: 'var(--bg-glass-active)' }}>
+      <div style={{ marginTop: '40px', padding: '32px', background: 'var(--bg-glass-active)', borderRadius: '16px', borderLeft: '4px solid var(--accent-primary)', borderTop: '1px solid var(--border-glass)', borderRight: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)', display: 'flex', gap: '24px', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ margin: '0 0 8px 0', fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>The Product Edge: Academic Export</h2>
+          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>
+            <strong>Why this is a product:</strong> It saves users 30+ minutes of formatting LaTeX geometry and logic equations manually, making this tool an indispensable part of their homework/teaching workflow. 
+            Instantly port your complex trees to Overleaf with a single click.
+          </p>
+        </div>
+        <div style={{ background: 'var(--accent-primary)', color: 'var(--btn-fill-text)', padding: '12px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+          LaTeX Ready
+        </div>
+      </div>
+
+      <div className="glass-panel" style={{ padding: '48px', marginTop: '48px', background: 'var(--bg-glass-active)' }}>
         <h2 style={{ marginBottom: '24px', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em' }}>What this Software Intends to Do</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
           <div>
@@ -97,19 +110,6 @@ export function Home() {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      <div style={{ marginTop: '48px', padding: '32px', background: 'var(--bg-glass-active)', borderRadius: '16px', borderLeft: '4px solid var(--accent-primary)', borderTop: '1px solid var(--border-glass)', borderRight: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)', display: 'flex', gap: '24px', alignItems: 'center' }}>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ margin: '0 0 8px 0', fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>The Product Edge: Academic Export</h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>
-            <strong>Why this is a product:</strong> It saves users 30+ minutes of formatting LaTeX geometry and logic equations manually, making this tool an indispensable part of their homework/teaching workflow. 
-            Instantly port your complex trees to Overleaf with a single click.
-          </p>
-        </div>
-        <div style={{ background: 'var(--accent-primary)', color: 'var(--btn-fill-text)', padding: '12px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-          LaTeX Ready
         </div>
       </div>
 
