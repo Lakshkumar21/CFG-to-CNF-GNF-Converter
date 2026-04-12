@@ -65,7 +65,7 @@ export default function CFGInput({ onConvert, error, isLoading, lastAction }) {
         variables,
         terminals,
         startVar,
-        rules: rules.filter(r => r.lhs && r.rhs.trim())
+        rules: rules
       }, type);
     }
   };
