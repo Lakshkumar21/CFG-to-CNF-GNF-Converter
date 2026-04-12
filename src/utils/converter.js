@@ -344,9 +344,21 @@ export function parseTextGrammar(text) {
 
 function configToG(config) {
   const productions = new Map();
+  if (!config.rules || config.rules.length === 0) {
+    throw new Error('No valid grammar rules found. Please check your syntax.');
+  }
+
   for (const rule of config.rules) {
-    const alts = rule.rhs.split('|').map(s => s.trim());
     const lhs = rule.lhs;
+    if (!lhs) {
+      throw new Error(`Invalid rule LHS. LHS must be Uppercase variables (e.g. S, A, B1).`);
+    }
+    const trimmedRhs = rule.rhs.trim();
+    if (!trimmedRhs) {
+      throw new Error(`Empty RHS for rule: "${lhs} -> ". Did you mean to use ε or eps?`);
+    }
+
+    const alts = trimmedRhs.split('|').map(s => s.trim());
     if (!productions.has(lhs)) productions.set(lhs, []);
     for (const alt of alts) {
       if (!alt || alt === EPSILON || alt === 'eps' || alt === 'epsilon') { productions.get(lhs).push([EPSILON]); }
@@ -363,6 +375,19 @@ function configToG(config) {
       }
     }
   }
+
+  // Final check: Look for undefined non-terminals
+  const definedVars = new Set(productions.keys());
+  for (const [lhs, ps] of productions) {
+    for (const p of ps) {
+      for (const token of p) {
+        if (token !== EPSILON && /^[A-Z]/.test(token) && !definedVars.has(token)) {
+          throw new Error(`Undefined variable: "${token}". You used "${token}" in the rule for "${lhs}", but never defined a production for it (e.g., ${token} -> ...).`);
+        }
+      }
+    }
+  }
+
   const g = { variables: [...config.variables].sort(), terminals: [...config.terminals].sort(), start: config.startVar, productions };
   return g;
 }
