@@ -143,7 +143,6 @@ function doEpsilonElim(g) {
     }
     np.set(v, nextPs);
   }
-  if (nullable.has(g.start)) { np.get(g.start).push([EPSILON]); }
   g.productions = np;
   dedup(g);
   updateSets(g);
@@ -408,7 +407,8 @@ export function convertToCNF(input) {
   // 2. ε-elimination
   const nullable = findNullable(g);
   doEpsilonElim(g);
-  steps.push(buildStep('Step 2: ε-elimination', 'Identified nullable variables and added productions for every combination of their presence in each rule.', null, g, true, { nullable: Array.from(nullable) }));
+  steps.push(buildStep('Step 2: ε-elimination', 'Identified nullable variables and added productions for every combination of their presence in each rule. ε is removed from all productions, including the start symbol.', null, g, true, { nullable: Array.from(nullable) }));
+
 
   // 3. Unit production removal
   const closures = {};
@@ -476,7 +476,8 @@ export function convertToGNF(input) {
 
   // Step 2: ε-elimination
   doEpsilonElim(g);
-  steps.push(buildStep('Step 2: ε-elimination', 'Eliminated all ε-productions except possibly from the start symbol.', null, g));
+  steps.push(buildStep('Step 2: ε-elimination', 'Eliminated all ε-productions from the grammar to ensure a pure simplified baseline.', null, g));
+
 
   // Step 3: Unit removal
   elimUnit(g);
