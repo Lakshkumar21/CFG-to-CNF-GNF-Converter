@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Check } from 'lucide-react';
 import { grammarToLatex } from '../utils/latexExport';
+import DerivationTree from './DerivationTree';
 
 function renderProduction(symbols) {
   if (!symbols || symbols.length === 0) {
@@ -48,6 +49,11 @@ export default function GrammarStep({ step }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h3 className="step-title" style={{ margin: 0 }}>{step.title}</h3>
           <span className="step-badge">Step</span>
+          {step.changesCount && (
+            <span className="step-badge" style={{ background: 'rgba(236, 72, 153, 0.3)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.5)' }}>
+              {step.changesCount} change{step.changesCount !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
         <button
           onClick={handleCopyLatex}
@@ -127,6 +133,21 @@ export default function GrammarStep({ step }) {
           <div style={{ fontStyle: 'italic', opacity: 0.5 }}>Empty grammar at this stage</div>
         )}
       </div>
+
+      {/* Derivation Trees */}
+      {step.exampleDerivationTree && (
+        <DerivationTree 
+          tree={step.exampleDerivationTree} 
+          title="Example Derivation (first production)" 
+        />
+      )}
+      
+      {step.modificationTree && (
+        <DerivationTree 
+          tree={step.modificationTree} 
+          title="Rule Transformation" 
+        />
+      )}
     </motion.div>
   );
 }
