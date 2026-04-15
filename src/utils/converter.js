@@ -257,8 +257,137 @@ function gToUIDict(g) {
   return dict;
 }
 
+/**
+ * Compare two grammars and track what changed
+ */
+function compareGrammars(gBefore, gAfter) {
+  const changes = [];
+  
+  // Check for removed variables
+  for (const v of (gBefore?.variables || [])) {
+    if (!gAfter.variables.includes(v)) {
+      changes.push({
+        type: 'removed',
+        variable: v,
+        beforeProds: gBefore.productions.get(v) || [],
+        afterProds: []
+      });
+    }
+  }
+  
+  // Check for added variables
+  for (const v of gAfter.variables) {
+    if (!(gBefore?.variables || []).includes(v)) {
+      const afterProds = gAfter.productions.get(v) || [];
+      changes.push({
+        type: 'added',
+        variable: v,
+        beforeProds: [],
+        afterProds: afterProds
+      });
+    }
+  }
+  
+  // Check for modified rules
+  for (const v of (gBefore?.variables || [])) {
+    if (gAfter.variables.includes(v)) {
+      const beforeProds = (gBefore.productions.get(v) || []).map(p => p.join('')).sort();
+      const afterProds = (gAfter.productions.get(v) || []).map(p => p.join('')).sort();
+      if (beforeProds.join('|') !== afterProds.join('|')) {
+        changes.push({
+          type: 'modified',
+          variable: v,
+          beforeProds: gBefore.productions.get(v) || [],
+          afterProds: gAfter.productions.get(v) || []
+        });
+      }
+    }
+  }
+  
+  return changes;
+}
+
+/**
+ * Build a simple derivation tree showing the first production from the start symbol
+ * This demonstrates how the grammar can generate strings
+ */
+function buildExampleDerivationTree(g) {
+  if (!g.productions.has(g.start)) return null;
+  
+  const startProductions = g.productions.get(g.start);
+  if (startProductions.length === 0) return null;
+  
+  const firstProduction = startProductions[0];
+  
+  return {
+    sym: g.start,
+    children: firstProduction.map(sym => ({
+      sym: sym,
+      terminal: !g.variables.includes(sym),
+      children: []
+    })),
+    terminal: false
+  };
+}
+
+/**
+ * Build a tree showing production rules that were modified in this step
+ */
+function buildModificationTree(changes) {
+  if (!changes || changes.length === 0) return null;
+  
+  const change = changes[0]; // Show first change
+  if (!change.beforeProds && !change.afterProds) return null;
+  
+  const beforeProds = change.beforeProds || [];
+  const afterProds = change.afterProds || [];
+  
+  // Create dynamic label showing the variable and type of change
+  const rootLabel = `${change.variable} → [${change.type}]`;
+  
+  // Helper to create production node
+  const createProdNode = (prod) => {
+    if (prod.length === 0) {
+      return {
+        sym: EPSILON,
+        terminal: true,
+        children: []
+      };
+    }
+    return {
+      sym: prod.join(''),
+      terminal: prod.length <= 2, // Production strings shown as terminals for visual clarity
+      children: []
+    };
+  };
+  
+  return {
+    sym: rootLabel,
+    children: [
+      {
+        sym: 'Before',
+        terminal: false,
+        children: beforeProds.length > 0 
+          ? beforeProds.map(createProdNode)
+          : [{ sym: EPSILON, terminal: true, children: [] }]
+      },
+      {
+        sym: 'After',
+        terminal: false,
+        children: afterProds.length > 0 
+          ? afterProds.map(createProdNode)
+          : [{ sym: EPSILON, terminal: true, children: [] }]
+      }
+    ],
+    terminal: false
+  };
+}
+
+// Track previous grammar for comparison
+let previousGrammar = null;
+
 function buildStep(title, explanation, info, g, isChanged = true, metadata = null) {
-  return { 
+  const step = { 
     title, 
     description: explanation + (info ? `\n\n${info}` : ''), 
     grammar: gToUIDict(g), 
@@ -267,6 +396,31 @@ function buildStep(title, explanation, info, g, isChanged = true, metadata = nul
     isChanged,
     metadata 
   };
+  
+  // Add example derivation tree
+  if (isChanged) {
+    const exampleTree = buildExampleDerivationTree(g);
+    if (exampleTree) {
+      step.exampleDerivationTree = exampleTree;
+    }
+    
+    // Add modification tree if grammar changed
+    if (previousGrammar) {
+      const changes = compareGrammars(previousGrammar, g);
+      if (changes.length > 0) {
+        const modTree = buildModificationTree(changes);
+        if (modTree) {
+          step.modificationTree = modTree;
+          step.changesCount = changes.length;
+        }
+      }
+    }
+    
+    // Store current grammar for next comparison
+    previousGrammar = cloneG(g);
+  }
+  
+  return step;
 }
 
 export function parseTextGrammar(text) {
@@ -398,6 +552,7 @@ function configToG(config) {
 export function convertToCNF(input) {
   let g = (typeof input === 'string') ? parseTextGrammar(input) : configToG(input);
   resetVars(g);
+  previousGrammar = null; // Reset comparison tracking
   const steps = [];
   
   // 1. Preprocessing
@@ -468,6 +623,7 @@ export function convertToCNF(input) {
 export function convertToGNF(input) {
   let g = (typeof input === 'string') ? parseTextGrammar(input) : configToG(input);
   resetVars(g);
+  previousGrammar = null; // Reset comparison tracking
   const steps = [];
 
   // Step 1: Preprocessing

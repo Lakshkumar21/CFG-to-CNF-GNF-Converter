@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowRightToLine, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRightToLine, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import './index.css';
 
 import CFGInput from './components/CFGInput';
@@ -19,6 +19,7 @@ const pageVariants = {
 
 function App() {
   const [steps, setSteps] = useState([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lastAction, setLastAction] = useState(null); // 'cnf' | 'gnf'
@@ -37,6 +38,7 @@ function App() {
   const handleConvert = (grammarConfig, type) => {
     setError(null);
     setSteps([]);
+    setCurrentStepIndex(0);
     setCnfGrammar(null);
     setLastAction(type);
     setIsLoading(true);
@@ -45,6 +47,7 @@ function App() {
       try {
         const outputSteps = type === 'gnf' ? convertToGNF(grammarConfig) : convertToCNF(grammarConfig);
         setSteps(outputSteps);
+        setCurrentStepIndex(0);
         if (outputSteps.length > 0) {
           if (type === 'cnf') {
             setCnfGrammar(outputSteps[outputSteps.length - 1].grammar);
@@ -139,7 +142,7 @@ function App() {
                       </motion.div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                        {/* Conversion Steps Section */}
+                        {/* Conversion Steps Section with Navigation */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                             <div style={{ height: '1px', flex: 1, background: 'var(--border-glass)' }} />
@@ -148,10 +151,102 @@ function App() {
                             </span>
                             <div style={{ height: '1px', flex: 1, background: 'var(--border-glass)' }} />
                           </div>
-                          {steps.map((step, index) => <GrammarStep key={index} step={step} isActive />)}
+
+                          {/* Step Counter & Navigation */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px' }}>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                              Step <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{currentStepIndex + 1}</span> of <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{steps.length}</span>
+                            </div>
+                            
+                            {/* Navigation Buttons */}
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
+                                disabled={currentStepIndex === 0}
+                                className="btn-reset-pill"
+                                style={{
+                                  padding: '8px 12px',
+                                  background: currentStepIndex === 0 ? 'var(--bg-glass)' : 'var(--bg-glass-active)',
+                                  border: '1px solid var(--border-glass)',
+                                  color: currentStepIndex === 0 ? 'var(--text-muted)' : 'var(--text-main)',
+                                  cursor: currentStepIndex === 0 ? 'not-allowed' : 'pointer',
+                                  borderRadius: '8px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '13px',
+                                  fontWeight: '600',
+                                  opacity: currentStepIndex === 0 ? 0.5 : 1,
+                                  transition: 'all 0.2s'
+                                }}
+                                title="Previous step"
+                              >
+                                <ChevronLeft size={16} />
+                                Prev
+                              </button>
+
+                              <button
+                                onClick={() => setCurrentStepIndex(Math.min(steps.length - 1, currentStepIndex + 1))}
+                                disabled={currentStepIndex === steps.length - 1}
+                                className="btn-reset-pill"
+                                style={{
+                                  padding: '8px 12px',
+                                  background: currentStepIndex === steps.length - 1 ? 'var(--bg-glass)' : 'var(--bg-glass-active)',
+                                  border: '1px solid var(--border-glass)',
+                                  color: currentStepIndex === steps.length - 1 ? 'var(--text-muted)' : 'var(--text-main)',
+                                  cursor: currentStepIndex === steps.length - 1 ? 'not-allowed' : 'pointer',
+                                  borderRadius: '8px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '13px',
+                                  fontWeight: '600',
+                                  opacity: currentStepIndex === steps.length - 1 ? 0.5 : 1,
+                                  transition: 'all 0.2s'
+                                }}
+                                title="Next step"
+                              >
+                                Next
+                                <ChevronRight size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div style={{
+                            height: '4px',
+                            background: 'var(--bg-glass)',
+                            borderRadius: '2px',
+                            overflow: 'hidden',
+                            marginBottom: '16px'
+                          }}>
+                            <motion.div
+                              initial={{ width: '0%' }}
+                              animate={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                              style={{
+                                height: '100%',
+                                background: 'linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))',
+                                borderRadius: '2px'
+                              }}
+                            />
+                          </div>
+
+                          {/* Current Step Display */}
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key={currentStepIndex}
+                              initial={{ opacity: 0, y: 16 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -16 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <GrammarStep step={steps[currentStepIndex]} isActive />
+                            </motion.div>
+                          </AnimatePresence>
                         </div>
 
-                        {/* Testing Playground Section */}
+                        {/* Testing Playground Section - Always Visible */}
                         <AnimatePresence>
                           {cnfGrammar && (
                             <motion.div
@@ -159,6 +254,13 @@ function App() {
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ duration: 0.4 }}
                             >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', marginTop: '24px' }}>
+                                <div style={{ height: '1px', flex: 1, background: 'var(--border-glass)' }} />
+                                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                  String Membership Testing
+                                </span>
+                                <div style={{ height: '1px', flex: 1, background: 'var(--border-glass)' }} />
+                              </div>
                               <StringParser cnfGrammar={cnfGrammar} />
                             </motion.div>
                           )}
